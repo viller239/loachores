@@ -30,21 +30,21 @@
 
     /* Flex-grid "table" */
     .grid { display: flex; flex-direction: row; gap: 6px; background: rgba(36,40,58,.6); padding: 6px; border-radius: 12px; align-items: stretch; border: 1px solid var(--border); overflow: auto; max-height: calc(100vh - 260px); box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
-    .col { display: flex; flex-direction: column; gap: 2px; background: transparent; }
+    .col { display: flex; flex-direction: column; gap: 2px; background: transparent; flex: 0 0 auto; }
     .cell { background: transparent; padding: 6px 8px; display: flex; align-items: center; justify-content: flex-start; height: 36px; box-sizing: border-box; border: 1px solid transparent; border-radius: 8px; transition: background .15s ease, border-color .15s ease; }
     .header { background: transparent; color: inherit; font-weight: 600; height: 48px; border: 1px solid var(--border); }
 
-    .activity-col { width: 220px; position: sticky; left: 0; z-index: 5; background: var(--card); border-right: 1px solid var(--border); border-radius: 8px; }
+    .activity-col { width: 220px; position: sticky; left: 0; z-index: 5; background: var(--card); border-right: 1px solid var(--border); border-radius: 8px; flex: 0 0 220px; }
     .activity-col .cell { justify-content: flex-start; }
     .activity-col .cell.header { position: sticky; top: 0; z-index: 6; border-radius: 8px; box-shadow: 0 2px 0 rgba(0,0,0,.2); }
 
-    .roster-col { min-width: 260px; background: rgba(0,0,0,0.0); border-left: 5px solid transparent; border-radius: 12px; }
+    .roster-col { min-width: 260px; background: rgba(0,0,0,0.0); border-left: 5px solid transparent; border-radius: 12px; flex: 0 0 auto; }
     .roster-col + .roster-col { margin-left: 6px; }
 
     .roster-title { position: sticky; top: 0; height: 34px; display: flex; align-items: center; justify-content: center; font-weight: 600; letter-spacing: .2px; background: var(--card); border: 1px solid var(--border); border-radius: 10px 10px 8px 8px; z-index: 4; box-shadow: 0 1px 0 rgba(0,0,0,.25); }
 
     .char-headers, .char-row { display: flex; flex-direction: row; gap: 2px; }
-    .char-head, .char-cell { width: 130px; justify-content: center; text-align: center; }
+    .char-head, .char-cell { flex: 0 0 130px; justify-content: center; text-align: center; }
 
     /* Row height alignment */
     .char-row { height: 36px; align-items: center; }
@@ -256,16 +256,6 @@
       return Math.floor((now.getTime() - baseWed0800) / MS_WEEK);
     }
 
-    // Build columns from rosters
-    function buildColumns(rosters) {
-      const cols = [];
-      rosters.forEach((roster, rosterIndex) => {
-        roster.characters.forEach((char, idxInRoster) => {
-          cols.push({ roster, char, idxInRoster, rosterIndex });
-        });
-      });
-      return cols;
-    }
 
     const app = Vue.createApp({
       data() {
@@ -299,7 +289,7 @@
         },
         onToggle(act, char, checked) {
           const k = this.keyFor(act, char);
-          this.$set ? this.$set(this.doneMap, k, checked) : (this.doneMap[k] = checked);
+          this.doneMap[k] = checked;
           try {
             if (checked) localStorage.setItem(k, '1');
             else localStorage.removeItem(k);
