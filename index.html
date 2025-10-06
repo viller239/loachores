@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Vue Roster Todo</title>
+  <!-- Vue 3 from CDN -->
+  <script src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    :root {
+      --bg: #0d0f15;
+      --bg-2: #0b0d13;
+      --card: #141826;
+      --muted: #8b93a7;
+      --text: #e7eaf3;
+      --accent: #5aa9e6;
+      --accent-2: #7dd3fc;
+      --row-alt: #111420;
+      --spacer: #0f1115;
+      --border: #24283a;
+      --border-2: #2e344a;
+      --ok: #22c55e;
+      --shadow: 0 10px 20px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.3);
+    }
+    html, body { margin: 0; padding: 0; background: radial-gradient(1000px 600px at 10% -10%, rgba(125,211,252,.08), transparent 50%), linear-gradient(180deg, var(--bg), var(--bg-2)); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    .container { max-width: 1240px; margin: 28px auto; padding: 18px 18px 28px; background: linear-gradient(180deg, rgba(20,24,38,.78), rgba(20,24,38,.6)); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); backdrop-filter: blur(6px); }
+    h1 { font-size: 22px; margin: 0 0 6px; font-weight: 700; letter-spacing: .2px; }
+    .meta { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+
+    /* Flex-grid "table" */
+    .grid { display: flex; flex-direction: row; gap: 6px; background: rgba(36,40,58,.6); padding: 6px; border-radius: 12px; align-items: stretch; border: 1px solid var(--border); overflow: auto; max-height: calc(100vh - 260px); box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
+    .col { display: flex; flex-direction: column; gap: 2px; background: transparent; }
+    .cell { background: rgba(255,255,255,0.02); padding: 6px 8px; display: flex; align-items: center; justify-content: flex-start; height: 36px; box-sizing: border-box; border: 1px solid transparent; border-radius: 8px; transition: background .15s ease, border-color .15s ease; }
+    .header { background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); color: inherit; font-weight: 600; height: 48px; border: 1px solid var(--border); }
+
+    .activity-col { width: 220px; position: sticky; left: 0; z-index: 5; background: linear-gradient(90deg, rgba(20,24,38,.9), rgba(20,24,38,.4)); border-right: 1px solid var(--border); border-radius: 8px; }
+    .activity-col .cell { justify-content: flex-start; }
+    .activity-col .cell.header { position: sticky; top: 0; z-index: 6; border-radius: 8px; box-shadow: 0 2px 0 rgba(0,0,0,.2); }
+
+    .roster-col { min-width: 260px; background: rgba(0,0,0,0.0); border-left: 5px solid transparent; border-radius: 12px; }
+    .roster-col + .roster-col { margin-left: 6px; }
+
+    .roster-title { position: sticky; top: 0; height: 34px; display: flex; align-items: center; justify-content: center; font-weight: 600; letter-spacing: .2px; background: linear-gradient(180deg, rgba(31,35,54,.9), rgba(20,24,38,.7)); border: 1px solid var(--border); border-radius: 10px 10px 8px 8px; z-index: 4; box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+
+    .char-headers, .char-row { display: flex; flex-direction: row; gap: 2px; }
+    .char-head, .char-cell { width: 130px; justify-content: center; text-align: center; }
+
+    /* Row height alignment */
+    .char-row { height: 36px; align-items: center; }
+    .char-head { height: 48px; }
+    .char-headers { height: 48px; position: sticky; top: 34px; background: linear-gradient(180deg, rgba(31,35,54,.85), rgba(20,24,38,.7)); z-index: 3; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+
+    .cell.check-cell { margin: 0 5px; padding: 0; background: rgba(255,255,255,0.02); }
+    .check-label { display: inline-flex; align-items: center; padding: 5px; }
+
+    .char-row:hover .char-cell { background: rgba(125,211,252,.06); border-color: var(--border-2); }
+    .char-row:nth-child(odd) .char-cell { background: rgba(255,255,255,0.015); }
+
+    .spacer-row { height: 12px; background: transparent; }
+
+    .char-name { font-weight: 600; }
+    .char-meta { color: var(--muted); font-size: 11px; }
+
+    .activity-name { display: inline-flex; align-items: center; gap: 8px; }
+    .badge { font-size: 10px; padding: 2px 6px; border-radius: 999px; background: #1f2937; color: #b8c4d9; border: 1px solid #2b364a; }
+
+    input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+    input[type="checkbox"][disabled] { opacity: .35; cursor: default; }
+
+    /* Generic dots for indicators */
+    .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; background: var(--accent-2); box-shadow: 0 0 0 1px rgba(125,211,252,.25); }
+    .dot.weekly { background: #22c55e; box-shadow: 0 0 0 1px rgba(34,197,94,.25); }
+    .dot.daily { background: #6366f1; box-shadow: 0 0 0 1px rgba(99,102,241,.25); }
+    .dot.roster { background: var(--accent-2); }
+    .activity-name .dot { margin-right: 6px; }
+
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin: 10px 0 14px; padding: 8px 10px; background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 10px; }
+    .legend .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; margin-right: 6px; background: var(--accent-2); }
+    .legend .dot.weekly { background: #22c55e; }
+    .legend .dot.daily { background: #6366f1; }
+
+    .footer { color: var(--muted); font-size: 12px; margin-top: 12px; opacity: .9; }
+    .ok { color: var(--ok); }
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <h1>Roster Todo</h1>
+    <div class="meta">
+      Daily reset 08:00 UTC. Weekly reset Wed 08:00 UTC. Keys are persisted in localStorage.
+    </div>
+
+    <div class="legend">
+      <div><span class="dot weekly"></span>Weekly</div>
+      <div><span class="dot daily"></span>Daily</div>
+      <div><span class="dot"></span>Roster-wide only visible on first character of each roster</div>
+    </div>
+
+    <div class="grid">
+      <!-- Activity names column -->
+      <div class="col activity-col">
+        <div class="cell header">Activity</div>
+        <template v-for="(act, aidx) in activities" :key="'an-' + aidx">
+          <div v-if="isSpacer(act)" class="spacer-row"></div>
+          <div v-else class="cell">
+            <span class="activity-name">
+              <span class="dot" :class="resetDotClass(act)"></span>
+              <span v-if="act.rosterWide" class="dot roster"></span>
+              <span>{{ act.name }}</span>
+            </span>
+          </div>
+        </template>
+      </div>
+
+      <!-- One column per roster, each containing a header row for chars and rows per activity -->
+      <template v-for="(roster, rIdx) in rosters" :key="'ro-' + rIdx">
+        <div class="col roster-col">
+          <div class="roster-title">{{ roster.name }}</div>
+          <!-- Character headers for this roster -->
+          <div class="char-headers">
+            <template v-for="(ch, chIdx) in roster.characters" :key="'chh-' + rIdx + '-' + chIdx">
+              <div class="cell header char-head">
+                <div class="char-name">{{ ch.name }}</div>
+                <div class="char-meta">{{ ch.class }} • Lv {{ ch.lvl }}</div>
+              </div>
+            </template>
+          </div>
+          <!-- Rows for activities -->
+          <template v-for="(act, aidx) in activities" :key="'rv-' + rIdx + '-' + aidx">
+            <div v-if="isSpacer(act)" class="spacer-row"></div>
+            <div v-else class="char-row">
+              <template v-for="(ch, chIdx) in roster.characters" :key="'c-' + rIdx + '-' + aidx + '-' + chIdx">
+                <div class="cell check-cell char-cell">
+                  <template v-if="shouldRenderForChar(act, chIdx)">
+                    <label class="check-label">
+                      <input type="checkbox"
+                        :checked="isChecked(act, ch)"
+                        @change="onToggle(act, ch, $event.target.checked)"
+                      />
+                    </label>
+                  </template>
+                  <template v-else>
+                    <span style="opacity:.2">—</span>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <div class="footer">
+      Day key: <strong>{{ dayNumber }}</strong> • Week key: <strong>{{ weekNumber }}</strong>
+      <span class="ok" v-if="storageOk">• localStorage available</span>
+      <span v-else>• localStorage not available</span>
+    </div>
+  </div>
+
+  <script>
+    // ==== Constants (top-of-file) ====
+    const DAILY_RESET_HOUR_UTC = 8;    // 08:00 UTC daily
+    const WEEKLY_RESET_DAY_UTC = 3;     // 0=Sun ... 3=Wed
+    const WEEKLY_RESET_HOUR_UTC = 8;    // 08:00 UTC Wednesday
+
+    // Sample data: rosters with characters (name, class, lvl)
+    // Per issue: 5 rosters with 9, 7, 5, 3, 2 characters respectively
+    const ROSTERS = [
+      {
+        name: 'Roster 1',
+        characters: [
+          { name: 'R1C1', class: 'Warrior', lvl: 1600 },
+          { name: 'R1C2', class: 'Mage', lvl: 1595 },
+          { name: 'R1C3', class: 'Rogue', lvl: 1590 },
+          { name: 'R1C4', class: 'Paladin', lvl: 1585 },
+          { name: 'R1C5', class: 'Hunter', lvl: 1580 },
+          { name: 'R1C6', class: 'Bard', lvl: 1575 },
+          { name: 'R1C7', class: 'Sorcerer', lvl: 1570 },
+          { name: 'R1C8', class: 'Lancer', lvl: 1565 },
+          { name: 'R1C9', class: 'Assassin', lvl: 1560 },
+        ],
+      },
+      {
+        name: 'Roster 2',
+        characters: [
+          { name: 'R2C1', class: 'Warrior', lvl: 1555 },
+          { name: 'R2C2', class: 'Mage', lvl: 1550 },
+          { name: 'R2C3', class: 'Rogue', lvl: 1545 },
+          { name: 'R2C4', class: 'Paladin', lvl: 1540 },
+          { name: 'R2C5', class: 'Hunter', lvl: 1535 },
+          { name: 'R2C6', class: 'Bard', lvl: 1530 },
+          { name: 'R2C7', class: 'Sorcerer', lvl: 1525 },
+        ],
+      },
+      {
+        name: 'Roster 3',
+        characters: [
+          { name: 'R3C1', class: 'Warrior', lvl: 1520 },
+          { name: 'R3C2', class: 'Mage', lvl: 1515 },
+          { name: 'R3C3', class: 'Rogue', lvl: 1510 },
+          { name: 'R3C4', class: 'Paladin', lvl: 1505 },
+          { name: 'R3C5', class: 'Hunter', lvl: 1500 },
+        ],
+      },
+      {
+        name: 'Roster 4',
+        characters: [
+          { name: 'R4C1', class: 'Warrior', lvl: 1495 },
+          { name: 'R4C2', class: 'Mage', lvl: 1490 },
+          { name: 'R4C3', class: 'Rogue', lvl: 1485 },
+        ],
+      },
+      {
+        name: 'Roster 5',
+        characters: [
+          { name: 'R5C1', class: 'Warrior', lvl: 1480 },
+          { name: 'R5C2', class: 'Mage', lvl: 1475 },
+        ],
+      },
+    ];
+
+    // Activities list. A name of 'space' is treated as a spacer row.
+    // Reset types: 'weekly' | 'daily' | 'none'
+    // Per spec: after the second 'space', activities are rosterWide.
+    const ACTIVITIES = [
+      { name: 'strike',     reset: 'daily',  rosterWide: false },
+      { name: 'mordum',     reset: 'weekly', rosterWide: false },
+      { name: 'brel',       reset: 'weekly', rosterWide: false },
+      { name: 'aigir',      reset: 'weekly', rosterWide: false },
+      { name: 'space',      reset: 'none',   rosterWide: false }, // spacer
+      { name: 'guild vendor', reset: 'daily',  rosterWide: false },
+      { name: 'paradise',   reset: 'daily',  rosterWide: false },
+      { name: 'cube',       reset: 'daily',  rosterWide: false },
+      { name: 'deezBoss',   reset: 'weekly', rosterWide: false },
+      { name: 'space',      reset: 'none',   rosterWide: false }, // spacer (after this: roster-wide)
+      { name: 'boss',       reset: 'weekly', rosterWide: true },
+      { name: 'gate',       reset: 'weekly', rosterWide: true },
+      { name: 'frog',       reset: 'weekly', rosterWide: true },
+    ];
+
+    // ==== Helpers for reset counters ====
+    const MS_HOUR = 60 * 60 * 1000;
+    const MS_DAY = 24 * MS_HOUR;
+    const MS_WEEK = 7 * MS_DAY;
+
+    function getDayNumber(now = new Date()) {
+      // Shift epoch by the daily reset hour so that boundaries fall at DAILY_RESET_HOUR_UTC
+      const base = Date.UTC(1970, 0, 1, DAILY_RESET_HOUR_UTC, 0, 0, 0); // 1970-01-01 08:00 UTC
+      return Math.floor((now.getTime() - base) / MS_DAY);
+    }
+
+    function getWeekNumber(now = new Date()) {
+      // Build a base aligned to the weekly reset boundary: Wednesday 08:00 UTC
+      const baseThu0800 = Date.UTC(1970, 0, 1, WEEKLY_RESET_HOUR_UTC, 0, 0, 0); // Thu 08:00
+      // Move back to Wednesday (one day earlier)
+      const baseWed0800 = baseThu0800 - MS_DAY; // 1969-12-31 08:00 UTC
+      return Math.floor((now.getTime() - baseWed0800) / MS_WEEK);
+    }
+
+    // Build columns from rosters
+    function buildColumns(rosters) {
+      const cols = [];
+      rosters.forEach((roster, rosterIndex) => {
+        roster.characters.forEach((char, idxInRoster) => {
+          cols.push({ roster, char, idxInRoster, rosterIndex });
+        });
+      });
+      return cols;
+    }
+
+    const app = Vue.createApp({
+      data() {
+        return {
+          rosters: ROSTERS,
+          activities: ACTIVITIES,
+          storageOk: true,
+          doneMap: {},
+        };
+      },
+      computed: {
+        dayNumber() { return getDayNumber(new Date()); },
+        weekNumber() { return getWeekNumber(new Date()); },
+      },
+      methods: {
+        isSpacer(act) { return (act.name || '').toLowerCase() === 'space'; },
+        resetDotClass(act) {
+          if (act.reset === 'weekly') return 'weekly';
+          if (act.reset === 'daily') return 'daily';
+          return '';
+        },
+        keyFor(act, char) {
+          let key = `done_${act.name}_${char.name}`;
+          if (act.reset === 'daily') key += `_${this.dayNumber}`;
+          else if (act.reset === 'weekly') key += `_${this.weekNumber}`;
+          return key;
+        },
+        isChecked(act, char) {
+          const k = this.keyFor(act, char);
+          return !!this.doneMap[k];
+        },
+        onToggle(act, char, checked) {
+          const k = this.keyFor(act, char);
+          this.$set ? this.$set(this.doneMap, k, checked) : (this.doneMap[k] = checked);
+          try {
+            if (checked) localStorage.setItem(k, '1');
+            else localStorage.removeItem(k);
+          } catch (e) { this.storageOk = false; }
+        },
+        shouldRenderForChar(act, idxInRoster) {
+          if (this.isSpacer(act)) return false;
+          if (!act.rosterWide) return true;
+          // Roster-wide: only for the first character in that roster
+          return idxInRoster === 0;
+        },
+        loadFromStorage() {
+          try {
+            // Probe localStorage
+            const probeKey = '__probe__';
+            localStorage.setItem(probeKey, '1');
+            localStorage.removeItem(probeKey);
+          } catch (e) {
+            this.storageOk = false;
+            return;
+          }
+          // Initialize doneMap from storage for visible cells
+          this.activities.forEach((act) => {
+            if (this.isSpacer(act)) return;
+            this.rosters.forEach((roster) => {
+              roster.characters.forEach((char, idxInRoster) => {
+                if (!this.shouldRenderForChar(act, idxInRoster)) return;
+                const k = this.keyFor(act, char);
+                const val = localStorage.getItem(k);
+                if (val === '1') this.doneMap[k] = true; else delete this.doneMap[k];
+              });
+            });
+          });
+        },
+      },
+      mounted() {
+        this.loadFromStorage();
+        // Optional: refresh keys on day/week boundary change (every minute)
+        this._timer = setInterval(() => {
+          const dn = getDayNumber(new Date());
+          const wn = getWeekNumber(new Date());
+          if (dn !== this.dayNumber || wn !== this.weekNumber) {
+            // Keys changed; reload view from storage under new suffixes
+            this.doneMap = {};
+            this.$nextTick(() => this.loadFromStorage());
+          }
+        }, 60 * 1000);
+      },
+      beforeUnmount() { clearInterval(this._timer); },
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>
