@@ -23,65 +23,231 @@
       --ok: #22c55e;
       --shadow: 0 10px 20px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.3);
     }
-    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
-    .container { max-width: 1240px; margin: 28px auto; padding: 18px 18px 28px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); backdrop-filter: blur(6px); }
-    h1 { font-size: 22px; margin: 0 0 6px; font-weight: 700; letter-spacing: .2px; }
-    .meta { color: var(--muted); font-size: 12px; margin-bottom: 12px; }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    .container {
+      max-width: 1240px;
+      margin: 28px auto;
+      padding: 18px 18px 28px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+    h1 {
+      font-size: 22px;
+      margin: 0 0 6px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+    .grid {
+      display: flex;
+      flex-direction: row;
+      gap: 6px;
+      background: transparent;
+      padding: 6px;
+      border-radius: 12px;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      overflow: auto;
+      max-height: calc(100vh - 260px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: transparent;
+      flex: 0 0 auto;
+    }
+    .cell {
+      background: transparent;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      height: 36px;
+      box-sizing: border-box;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .header {
+      background: transparent;
+      color: inherit;
+      font-weight: 600;
+      height: 48px;
+      border: 1px solid var(--border);
+    }
 
-    /* Flex-grid "table" */
-    .grid { display: flex; flex-direction: row; gap: 6px; background: rgba(36,40,58,.6); padding: 6px; border-radius: 12px; align-items: stretch; border: 1px solid var(--border); overflow: auto; max-height: calc(100vh - 260px); box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
-    .col { display: flex; flex-direction: column; gap: 2px; background: transparent; flex: 0 0 auto; }
-    .cell { background: transparent; padding: 6px 8px; display: flex; align-items: center; justify-content: flex-start; height: 36px; box-sizing: border-box; border: 1px solid transparent; border-radius: 8px; transition: background .15s ease, border-color .15s ease; }
-    .header { background: transparent; color: inherit; font-weight: 600; height: 48px; border: 1px solid var(--border); }
-
-    .activity-col { width: 220px; position: sticky; left: 0; z-index: 5; background: var(--card); border-right: 1px solid var(--border); border-radius: 8px; flex: 0 0 220px; }
-    .activity-col .cell { justify-content: flex-start; }
-    .activity-col .cell.header { position: sticky; top: 0; z-index: 6; border-radius: 8px; box-shadow: 0 2px 0 rgba(0,0,0,.2); }
-
-    .roster-col { min-width: 260px; background: rgba(0,0,0,0.0); border-left: 5px solid transparent; border-radius: 12px; flex: 0 0 auto; }
-    .roster-col + .roster-col { margin-left: 6px; }
-
-    .roster-title { position: sticky; top: 0; height: 34px; display: flex; align-items: center; justify-content: center; font-weight: 600; letter-spacing: .2px; background: var(--card); border: 1px solid var(--border); border-radius: 10px 10px 8px 8px; z-index: 4; box-shadow: 0 1px 0 rgba(0,0,0,.25); }
-
-    .char-headers, .char-row { display: flex; flex-direction: row; gap: 2px; }
-    .char-head, .char-cell { flex: 0 0 130px; justify-content: center; text-align: center; }
-
-    /* Row height alignment */
-    .char-row { height: 36px; align-items: center; }
-    .char-head { height: 48px; }
-    .char-headers { height: 48px; position: sticky; top: 34px; background: var(--card); z-index: 3; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 1px 0 rgba(0,0,0,.25); }
-
-    .cell.check-cell { margin: 0 5px; padding: 0; background: transparent; }
-    .check-label { display: inline-flex; align-items: center; padding: 5px; }
-
-    .char-row:hover .char-cell { background: transparent; border-color: var(--border); }
-    .char-row:nth-child(odd) .char-cell { background: transparent; }
-
-    .spacer-row { height: 12px; background: transparent; }
-
-    .char-name { font-weight: 600; }
-    .char-meta { color: var(--muted); font-size: 11px; }
-
-    .activity-name { display: inline-flex; align-items: center; gap: 8px; }
-    .badge { font-size: 10px; padding: 2px 6px; border-radius: 999px; background: #1f2937; color: #b8c4d9; border: 1px solid #2b364a; }
-
-    input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
-    input[type="checkbox"][disabled] { opacity: .35; cursor: default; }
-
-    /* Generic dots for indicators */
-    .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; background: var(--accent-2); box-shadow: 0 0 0 1px rgba(125,211,252,.25); }
-    .dot.weekly { background: #22c55e; box-shadow: 0 0 0 1px rgba(34,197,94,.25); }
-    .dot.daily { background: #6366f1; box-shadow: 0 0 0 1px rgba(99,102,241,.25); }
-    .dot.roster { background: var(--accent-2); }
-    .activity-name .dot { margin-right: 6px; }
-
-    .legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin: 10px 0 14px; padding: 8px 10px; background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 10px; }
-    .legend .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; margin-right: 6px; background: var(--accent-2); }
-    .legend .dot.weekly { background: #22c55e; }
-    .legend .dot.daily { background: #6366f1; }
-
-    .footer { color: var(--muted); font-size: 12px; margin-top: 12px; opacity: .9; }
-    .ok { color: var(--ok); }
+    .activity-col {
+      width: 220px;
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      background: transparent;
+      border-right: 1px solid var(--border);
+      border-radius: 8px;
+      flex: 0 0 220px;
+    }
+    .activity-col .cell {
+      justify-content: flex-start;
+    }
+    .activity-col .cell.header {
+      position: sticky;
+      top: 0;
+      z-index: 6;
+      border-radius: 8px;
+      box-shadow: 0 2px 0 rgba(0,0,0,.2);
+    }
+    .roster-col {
+      min-width: 260px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      flex: 0 0 auto;
+    }
+    .roster-col + .roster-col {
+      margin-left: 6px;
+    }
+    .char-headers,
+    .char-row {
+      display: flex;
+      flex-direction: row;
+      gap: 2px;
+    }
+    .char-head,
+    .char-cell {
+      flex: 0 0 130px;
+      justify-content: center;
+      text-align: center;
+    }
+    .char-row {
+      height: 36px;
+      align-items: center;
+    }
+    .char-head {
+      height: 48px;
+    }
+    .char-headers {
+      height: 48px;
+      position: sticky;
+      top: 0;
+      background: transparent;
+      z-index: 3;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 1px 0 rgba(0,0,0,.25);
+    }
+    .cell.check-cell {
+      margin: 0 5px;
+      padding: 0;
+      background: transparent;
+    }
+    .check-label {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px;
+    }
+    .char-row:hover .char-cell {
+      background: transparent;
+      border-color: var(--border);
+    }
+    .char-row:nth-child(odd) .char-cell {
+      background: transparent;
+    }
+    .spacer-row {
+      height: 12px;
+      background: transparent;
+    }
+    .char-name {
+      font-weight: 600;
+    }
+    .char-meta {
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .activity-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    input[type="checkbox"][disabled] {
+      opacity: .35;
+      cursor: default;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 1px rgba(125,211,252,.25);
+    }
+    .dot.weekly {
+      background: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34,197,94,.25);
+    }
+    .dot.daily {
+      background: #6366f1;
+      box-shadow: 0 0 0 1px rgba(99,102,241,.25);
+    }
+    .dot.roster {
+      background: var(--accent-2);
+    }
+    .activity-name .dot {
+      margin-right: 6px;
+    }
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 10px 0 14px;
+      padding: 8px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .legend .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 6px;
+      background: var(--accent-2);
+    }
+    .legend .dot.weekly {
+      background: #22c55e;
+    }
+    .legend .dot.daily {
+      background: #6366f1;
+    }
+    .footer {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 12px;
+      opacity: .9;
+    }
   </style>
 </head>
 <body>
@@ -116,7 +282,6 @@
       <!-- One column per roster, each containing a header row for chars and rows per activity -->
       <template v-for="(roster, rIdx) in rosters" :key="'ro-' + rIdx">
         <div class="col roster-col">
-          <div class="roster-title">{{ roster.name }}</div>
           <!-- Character headers for this roster -->
           <div class="char-headers">
             <template v-for="(ch, chIdx) in roster.characters" :key="'chh-' + rIdx + '-' + chIdx">
