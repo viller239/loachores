@@ -93,6 +93,11 @@
       flex-direction: row;
       gap: 2px;
     }
+    .char-columns {
+      display: flex;
+      flex-direction: row;
+      gap: 2px;
+    }
     .char-head,
     .char-cell {
       flex: 0 0 130px;
@@ -214,38 +219,34 @@
         </template>
       </div>
 
-      <!-- One column per roster, each containing a header row for chars and rows per activity -->
+      <!-- One column per roster; inside, render one column per character. Each character column shows the name, then a checkbox per activity. -->
       <template v-for="(roster, rIdx) in rosters" :key="'ro-' + rIdx">
         <div class="col roster-col">
-          <!-- Character headers for this roster -->
-          <div class="char-headers">
-            <template v-for="(ch, chIdx) in roster.characters" :key="'chh-' + rIdx + '-' + chIdx">
-              <div class="cell header char-head">
-                <div class="char-name">{{ ch.name }}</div>
+          <div class="char-columns">
+            <template v-for="(ch, chIdx) in roster.characters" :key="'char-col-' + rIdx + '-' + chIdx">
+              <div class="col char-col">
+                <div class="cell header char-head">
+                  <div class="char-name">{{ ch.name }}</div>
+                </div>
+                <template v-for="(act, aidx) in activities" :key="'charcell-' + rIdx + '-' + chIdx + '-' + aidx">
+                  <div v-if="isSpacer(act)" class="spacer-row"></div>
+                  <div v-else class="cell check-cell char-cell">
+                    <template v-if="shouldRenderForChar(act, chIdx)">
+                      <label class="check-label">
+                        <input type="checkbox"
+                          :checked="isChecked(act, ch)"
+                          @change="onToggle(act, ch, $event.target.checked)"
+                        />
+                      </label>
+                    </template>
+                    <template v-else>
+                      <span style="opacity:.2">—</span>
+                    </template>
+                  </div>
+                </template>
               </div>
             </template>
           </div>
-          <!-- Rows for activities -->
-          <template v-for="(act, aidx) in activities" :key="'rv-' + rIdx + '-' + aidx">
-            <div v-if="isSpacer(act)" class="spacer-row"></div>
-            <div v-else class="char-row">
-              <template v-for="(ch, chIdx) in roster.characters" :key="'c-' + rIdx + '-' + aidx + '-' + chIdx">
-                <div class="cell check-cell char-cell">
-                  <template v-if="shouldRenderForChar(act, chIdx)">
-                    <label class="check-label">
-                      <input type="checkbox"
-                        :checked="isChecked(act, ch)"
-                        @change="onToggle(act, ch, $event.target.checked)"
-                      />
-                    </label>
-                  </template>
-                  <template v-else>
-                    <span style="opacity:.2">—</span>
-                  </template>
-                </div>
-              </template>
-            </div>
-          </template>
         </div>
       </template>
     </div>
