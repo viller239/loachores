@@ -258,69 +258,66 @@
     const WEEKLY_RESET_DAY_UTC = 3;     // 0=Sun ... 3=Wed
     const WEEKLY_RESET_HOUR_UTC = 8;    // 08:00 UTC Wednesday
 
-    // Sample data: rosters with characters (name, class, lvl)
-    // Per issue: 5 rosters with 9, 7, 5, 3, 2 characters respectively
     const ROSTERS = [
       {
-        name: 'Roster 1',
         characters: [
-          { name: 'R1C1', class: 'Warrior', lvl: 1600 },
-          { name: 'R1C2', class: 'Mage', lvl: 1595 },
-          { name: 'R1C3', class: 'Rogue', lvl: 1590 },
-          { name: 'R1C4', class: 'Paladin', lvl: 1585 },
-          { name: 'R1C5', class: 'Hunter', lvl: 1580 },
-          { name: 'R1C6', class: 'Bard', lvl: 1575 },
-          { name: 'R1C7', class: 'Sorcerer', lvl: 1570 },
-          { name: 'R1C8', class: 'Lancer', lvl: 1565 },
-          { name: 'R1C9', class: 'Assassin', lvl: 1560 },
+          { name: 'GL' },
+          { name: 'Zerk' },
+          { name: 'Pala' },
+          { name: 'Arti' },
+          { name: 'SH' },
+          { name: 'Sorc' },
+          { name: 'Bard' },
+          { name: 'Artist' },
+          { name: 'WS' },
         ],
       },
       {
-        name: 'Roster 2',
         characters: [
-          { name: 'R2C1', class: 'Warrior', lvl: 1555 },
-          { name: 'R2C2', class: 'Mage', lvl: 1550 },
-          { name: 'R2C3', class: 'Rogue', lvl: 1545 },
-          { name: 'R2C4', class: 'Paladin', lvl: 1540 },
-          { name: 'R2C5', class: 'Hunter', lvl: 1535 },
-          { name: 'R2C6', class: 'Bard', lvl: 1530 },
-          { name: 'R2C7', class: 'Sorcerer', lvl: 1525 },
+          { name: 'SL1' },
+          { name: 'SL2' },
+          { name: 'SL3' },
+          { name: 'SL4' },
+          { name: 'SL5' },
+          { name: 'SL6' },
+          { name: 'SE' },
+          { name: 'Breaker' },
         ],
       },
       {
-        name: 'Roster 3',
         characters: [
-          { name: 'R3C1', class: 'Warrior', lvl: 1520 },
-          { name: 'R3C2', class: 'Mage', lvl: 1515 },
-          { name: 'R3C3', class: 'Rogue', lvl: 1510 },
-          { name: 'R3C4', class: 'Paladin', lvl: 1505 },
-          { name: 'R3C5', class: 'Hunter', lvl: 1500 },
+          { name: 'GL01' },
+          { name: 'GL02' },
+          { name: 'GL03' },
+          { name: 'GL04' },
+          { name: 'GL05' },
         ],
       },
       {
-        name: 'Roster 4',
         characters: [
-          { name: 'R4C1', class: 'Warrior', lvl: 1495 },
-          { name: 'R4C2', class: 'Mage', lvl: 1490 },
-          { name: 'R4C3', class: 'Rogue', lvl: 1485 },
+          { name: 'GL11' },
+          { name: 'GL12' },
+          { name: 'GL13' },
         ],
       },
       {
-        name: 'Roster 5',
         characters: [
-          { name: 'R5C1', class: 'Warrior', lvl: 1480 },
-          { name: 'R5C2', class: 'Mage', lvl: 1475 },
+          { name: 'SL01' },
+          { name: 'SL02' },
         ],
       },
     ];
+
+    const R_WEEKLY = 'weekly';
+    const R_DAILY = 'daily';
 
     // Activities list. A name of 'space' is treated as a spacer row.
     // Reset types: 'weekly' | 'daily' | 'none'
     // Per spec: after the second 'space', activities are rosterWide.
     const ACTIVITIES = [
-      { name: 'strike',     reset: 'daily',  rosterWide: false },
-      { name: 'mordum',     reset: 'weekly', rosterWide: false },
-      { name: 'brel',       reset: 'weekly', rosterWide: false },
+      { name: 'strike', reset: R_WEEKLY },
+      { name: 'mordum', reset: R_DAILY },
+      { name: 'brel', reset: R_WEEKLY, rosterWide: false },
       { name: 'aigir',      reset: 'weekly', rosterWide: false },
       { name: 'space',      reset: 'none',   rosterWide: false }, // spacer
       { name: 'guild vendor', reset: 'daily',  rosterWide: false },
