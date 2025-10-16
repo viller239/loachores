@@ -252,7 +252,6 @@
         { name: 'cube', reset: R_WEEKLY },
         { name: 'deezBoss', reset: R_WEEKLY },
         { spacer: true },
-        { name: 'frog', reset: R_WEEKLY, roster: true },
         { name: 'boss', reset: R_DAILY, roster: true },
         { name: 'gate', reset: R_DAILY, roster: true },
     ];
@@ -279,15 +278,9 @@
                 storageOk: true,
                 doneMap: {},
                 hiddenMap: {},
+                dayNumber: getDayNumber(),
+                weekNumber: getWeekNumber(),
             };
-        },
-        computed: {
-            dayNumber() {
-                return getDayNumber(new Date());
-            },
-            weekNumber() {
-                return getWeekNumber(new Date());
-            },
         },
         methods: {
             keyFor(act, char) {
@@ -373,11 +366,13 @@
             this.loadHiddenFromStorage();
             // Optional: refresh keys on day/week boundary change (every minute)
             this._timer = setInterval(() => {
-                const dn = getDayNumber(new Date());
-                const wn = getWeekNumber(new Date());
+                const dn = getDayNumber();
+                const wn = getWeekNumber();
                 if (dn !== this.dayNumber || wn !== this.weekNumber) {
                     // Keys changed; reload view from storage under new suffixes
                     this.doneMap = {};
+                    this.dayNumber = dn;
+                    this.weekNumber = wn;
                     this.$nextTick(() => this.loadFromStorage());
                 }
             }, 60 * 1000);
