@@ -148,13 +148,15 @@
         <div class="col activity-col">
             <div class="cell"></div>
             <template v-for="(act, i) in activities" :key="'an-' + i">
-                <div v-if="act.spacer" class="spacer-row"></div>
-                <div v-else class="cell">
-                    <span class="activity-name">
-                        <span v-if="act.reset" class="dot" :class="act.reset"></span>
-                        <span>{{ act.name }}</span>
-                    </span>
-                </div>
+                <template v-if="!act.shouldRender || act.shouldRender(day)">
+                    <div v-if="act.spacer" class="spacer-row"></div>
+                    <div v-else class="cell">
+                        <span class="activity-name">
+                            <span v-if="act.reset" class="dot" :class="act.reset"></span>
+                            <span>{{ act.name }}</span>
+                        </span>
+                    </div>
+                </template>
             </template>
         </div>
         <template v-for="(roster, rIdx) in rosters" :key="'ro-' + rIdx">
@@ -163,20 +165,22 @@
                     <div class="col char-col">
                         <div class="cell">{{ ch.name }}</div>
                         <template v-for="(act, aIdx) in activities" :key="'char-cell-' + aIdx">
-                            <div v-if="act.spacer" class="spacer-row"></div>
-                            <div v-else class="cell check-cell char-cell">
-                                <template v-if="!act.roster || (chIdx === 0)">
-                                    <label class="check-label"
-                                           :class="{ hidden: isHidden(act, ch) }"
-                                           @contextmenu="(e) => { e.preventDefault(); onToggleHidden(act, ch); }"
-                                    >
-                                        <input type="checkbox"
-                                               :checked="isChecked(act, ch)"
-                                               @change="onToggle(act, ch, $event.target.checked)"
-                                        />
-                                    </label>
-                                </template>
-                            </div>
+                            <template v-if="!act.shouldRender || act.shouldRender(day)">
+                                <div v-if="act.spacer" class="spacer-row"></div>
+                                <div v-else class="cell check-cell char-cell">
+                                    <template v-if="!act.roster || (chIdx === 0)">
+                                        <label class="check-label"
+                                               :class="{ hidden: isHidden(act, ch) }"
+                                               @contextmenu="(e) => { e.preventDefault(); onToggleHidden(act, ch); }"
+                                        >
+                                            <input type="checkbox"
+                                                   :checked="isChecked(act, ch)"
+                                                   @change="onToggle(act, ch, $event.target.checked)"
+                                            />
+                                        </label>
+                                    </template>
+                                </div>
+                            </template>
                         </template>
                     </div>
                 </template>
@@ -248,9 +252,9 @@
         { name: 'aigir', reset: R_WEEKLY },
         { spacer: true },
         { name: 'guild vendor', reset: R_WEEKLY },
-        { name: 'paradise', reset: R_WEEKLY },
+        { name: 'paradise', reset: R_WEEKLY, shouldRender: () => false },
         { name: 'cube', reset: R_WEEKLY },
-        { name: 'deezBoss', reset: R_WEEKLY },
+        { name: 'deezBoss', reset: R_WEEKLY, shouldRender: () => false },
         { spacer: true },
         {
             name: 'boss',
@@ -263,6 +267,12 @@
             reset: R_DAILY,
             roster: true,
             shouldRender: (day) => [0, 1, 4, 6].includes(day),
+        },
+        {
+            name: 'chop trees',
+            reset: R_DAILY,
+            roster: true,
+            shouldRender: (day) => [4, 6, 1, 2].includes(day),
         },
     ];
 
