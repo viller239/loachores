@@ -252,8 +252,18 @@
         { name: 'cube', reset: R_WEEKLY },
         { name: 'deezBoss', reset: R_WEEKLY },
         { spacer: true },
-        { name: 'boss', reset: R_DAILY, roster: true },
-        { name: 'gate', reset: R_DAILY, roster: true },
+        {
+            name: 'boss',
+            reset: R_DAILY,
+            roster: true,
+            shouldRender: (day) => [0, 2, 5].includes(day),
+        },
+        {
+            name: 'gate',
+            reset: R_DAILY,
+            roster: true,
+            shouldRender: (day) => [0, 1, 4, 6].includes(day),
+        },
     ];
 
     const MS_HOUR = 60 * 60 * 1000;
@@ -270,6 +280,11 @@
         return Math.floor((now.getTime() - base) / MS_WEEK);
     }
 
+    function getDayOfWeek() {
+        const now = new Date();
+        return now.getUTCHours() >= DAILY_RESET_HOUR_UTC ? now.getUTCDay() : now.getUTCDay() - 1;
+    }
+
     const app = Vue.createApp({
         data() {
             return {
@@ -280,6 +295,7 @@
                 hiddenMap: {},
                 dayNumber: getDayNumber(),
                 weekNumber: getWeekNumber(),
+                day: getDayOfWeek(),
             };
         },
         methods: {
@@ -373,6 +389,7 @@
                     this.doneMap = {};
                     this.dayNumber = dn;
                     this.weekNumber = wn;
+                    this.day = getDayOfWeek();
                     this.$nextTick(() => this.loadFromStorage());
                 }
             }, 60 * 1000);
