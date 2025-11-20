@@ -204,6 +204,7 @@
                 { name: 'Bard' },
                 { name: 'Artist' },
                 { name: 'WS' },
+                { name: 'Aero' },
             ],
         },
         {
@@ -246,15 +247,19 @@
     const R_DAILY = 'daily';
 
     const ACTIVITIES = [
-        { name: 'strike', reset: R_WEEKLY },
-        { name: 'mordum', reset: R_WEEKLY },
-        { name: 'brel', reset: R_WEEKLY },
         { name: 'aigir', reset: R_WEEKLY },
+        { name: 'brel', reset: R_WEEKLY },
+        { name: 'mordum', reset: R_WEEKLY },
+        { name: 'act4 g1', reset: R_WEEKLY },
+        { name: 'act4 g2', reset: R_WEEKLY },
+        { name: 'kaze g1', reset: R_WEEKLY },
+        { name: 'kaze g2', reset: R_WEEKLY },
         { spacer: true },
         { name: 'guild vendor', reset: R_WEEKLY },
-        { name: 'paradise', reset: R_WEEKLY, shouldRender: () => false },
         { name: 'cube', reset: R_WEEKLY },
-        { name: 'deezBoss', reset: R_WEEKLY, shouldRender: () => false },
+        { name: 'elysian', reset: R_WEEKLY },
+        { name: 'Crucible', reset: R_WEEKLY },
+        { name: 'Hell', reset: R_WEEKLY },
         { spacer: true },
         {
             name: 'boss',
