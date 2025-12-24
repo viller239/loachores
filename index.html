@@ -56,12 +56,18 @@
         }
 
         .cell {
-            padding: 6px;
+            padding: 3px;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            height: 36px;
+            justify-content: center;
+            height: 34px;
             box-sizing: border-box;
+        }
+
+        .cell-name {
+            width: 40px;
+            font-size: 14px;
+            font-weight: bold;
         }
 
         .activity-col {
@@ -106,6 +112,7 @@
             height: 18px;
             accent-color: var(--accent);
             cursor: pointer;
+            margin: 0;
         }
 
         input[type="checkbox"][disabled] {
@@ -163,7 +170,7 @@
             <div class="col roster-col">
                 <template v-for="(ch, chIdx) in roster.characters" :key="'char-col-' + chIdx">
                     <div class="col char-col">
-                        <div class="cell">{{ ch.name }}</div>
+                        <div class="cell cell-name">{{ ch.name }}</div>
                         <template v-for="(act, aIdx) in activities" :key="'char-cell-' + aIdx">
                             <template v-if="!act.shouldRender || act.shouldRender(day)">
                                 <div v-if="act.spacer" class="spacer-row"></div>
@@ -209,37 +216,40 @@
         },
         {
             characters: [
-                { name: 'SL1' },
-                { name: 'SL2' },
-                { name: 'SL3' },
-                { name: 'SL4' },
-                { name: 'SL5' },
-                { name: 'SL6' },
+                { name: 'S1' },
+                { name: 'S2' },
+                { name: 'S3' },
+                { name: 'S4' },
+                { name: 'S5' },
+                { name: 'S6' },
                 { name: 'SE' },
                 { name: 'Brk' },
             ],
         },
         {
             characters: [
-                { name: 'GL01' },
-                { name: 'GL02' },
-                { name: 'GL03' },
-                { name: 'GL04' },
-                { name: 'GL05' },
+                { name: 'G01' },
+                { name: 'G02' },
+                { name: 'G03' },
+                { name: 'G04' },
+                { name: 'G05' },
+                { name: 'G06' },
             ],
         },
         {
             characters: [
-                { name: 'GL11' },
-                { name: 'GL12' },
-                { name: 'GL13' },
+                { name: 'G11' },
+                { name: 'G12' },
+                { name: 'G13' },
+                { name: 'G14' },
             ],
         },
         {
             characters: [
-                { name: 'SL01' },
-                { name: 'SL02' },
-                { name: 'SL03' },
+                { name: 'S01' },
+                { name: 'S02' },
+                { name: 'S03' },
+                { name: 'S04' },
             ],
         },
     ];
@@ -252,8 +262,7 @@
         { name: 'brel', reset: R_WEEKLY },
         { name: 'mordum', reset: R_WEEKLY },
         { name: 'armoche', reset: R_WEEKLY },
-        { name: 'kaze g1', reset: R_WEEKLY },
-        { name: 'kaze g2', reset: R_WEEKLY },
+        { name: 'kaze', reset: R_WEEKLY },
         { spacer: true },
         { name: 'guild vendor', reset: R_WEEKLY },
         { name: 'cube', reset: R_WEEKLY },
