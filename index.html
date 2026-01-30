@@ -65,8 +65,8 @@
         }
 
         .cell-name {
-            width: 40px;
-            font-size: 14px;
+            width: 34px;
+            font-size: 12px;
             font-weight: bold;
         }
 
@@ -91,6 +91,7 @@
             display: inline-flex;
             align-items: center;
             padding: 5px;
+            cursor: pointer;
         }
 
         .check-label.hidden {
@@ -115,11 +116,6 @@
             margin: 0;
         }
 
-        input[type="checkbox"][disabled] {
-            opacity: .35;
-            cursor: default;
-        }
-
         .dot {
             width: 8px;
             height: 8px;
@@ -142,6 +138,30 @@
             font-size: 14px;
             margin-bottom: 16px;
             /* todo padding left */
+        }
+
+        .count-input {
+            width: 28px;
+            height: 18px;
+            font-size: 14px;
+            line-height: 18px;
+            text-align: center;
+            color: var(--text);
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 0;
+            margin: 0 -5px;
+        }
+
+        .count-input::-webkit-outer-spin-button,
+        .count-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .count-input.is-zero:not(:hover,:focus) {
+            opacity: 0.1;
         }
     </style>
 </head>
@@ -180,10 +200,19 @@
                                                :class="{ hidden: isHidden(act, ch) }"
                                                @contextmenu="(e) => { e.preventDefault(); onToggleHidden(act, ch); }"
                                         >
-                                            <input type="checkbox"
-                                                   :checked="isChecked(act, ch)"
-                                                   @change="onToggle(act, ch, $event.target.checked)"
-                                            />
+                                            <template v-if="act.counter">
+                                                <input class="count-input" :class="{ 'is-zero': getCount(act, ch) === 0 }" type="number" min="0" step="1"
+                                                       :value="getCount(act, ch)"
+                                                       @input="onCountChange(act, ch, $event.target.value)"
+                                                       @wheel.prevent="onCountWheel(act, ch, $event)"
+                                                />
+                                            </template>
+                                            <template v-else>
+                                                <input type="checkbox"
+                                                       :checked="isChecked(act, ch)"
+                                                       @change="onToggle(act, ch, $event.target.checked)"
+                                                />
+                                            </template>
                                         </label>
                                     </template>
                                 </div>
@@ -252,6 +281,16 @@
                 { name: 'S04' },
             ],
         },
+        {
+            characters: [
+                { name: 'Pala' },
+                { name: 'Bard' },
+                { name: 'Sct' },
+                { name: 'Sum' },
+                { name: 'Scrp' },
+                { name: 'SH' },
+            ],
+        },
     ];
 
     const R_WEEKLY = 'weekly';
@@ -291,6 +330,11 @@
             roster: true,
             shouldRender: (day) => [4, 6, 1, 2].includes(day),
         },
+        { spacer: true },
+        { name: 'cube 4', counter: true },
+        { name: 'cube 3', counter: true },
+        { name: 'cube 2', counter: true },
+        { name: 'cube 1', counter: true },
     ];
 
     const MS_HOUR = 60 * 60 * 1000;
@@ -320,6 +364,7 @@
                 storageOk: true,
                 doneMap: {},
                 hiddenMap: {},
+                countMap: {},
                 dayNumber: getDayNumber(),
                 weekNumber: getWeekNumber(),
                 day: getDayOfWeek(),
@@ -334,6 +379,62 @@
                     key += `_${this.weekNumber}`;
                 }
                 return key;
+            },
+            countKey(act, char) {
+                let key = `count_${act.name}_${char.name}`;
+                if (act.reset === R_DAILY) {
+                    key += `_${this.dayNumber}`;
+                } else if (act.reset === R_WEEKLY) {
+                    key += `_${this.weekNumber}`;
+                }
+                return key;
+            },
+            getCount(act, char) {
+                const k = this.countKey(act, char);
+                const cached = this.countMap[k];
+                if (typeof cached === 'number') return cached;
+                let n = 0;
+                try {
+                    const raw = localStorage.getItem(k);
+                    if (raw != null) {
+                        const parsed = parseInt(raw, 10);
+                        if (!isNaN(parsed) && parsed >= 0) {
+                            n = parsed;
+                        }
+                    }
+                } catch (e) {
+                    this.storageOk = false;
+                }
+                this.countMap[k] = n;
+                return n;
+            },
+            onCountChange(act, char, value) {
+                const k = this.countKey(act, char);
+                let n = parseInt(value, 10);
+                if (isNaN(n) || n < 0) n = 0;
+                this.countMap[k] = n;
+                try {
+                    if (n === 0) {
+                        localStorage.removeItem(k);
+                    } else {
+                        localStorage.setItem(k, String(n));
+                    }
+                } catch (e) {
+                    this.storageOk = false;
+                }
+            },
+            onCountWheel(act, char, e) {
+                // Adjust count with mouse wheel when hovering over the counter input
+                // Scroll up (deltaY < 0) increases; scroll down (deltaY > 0) decreases
+                if (e && typeof e.preventDefault === 'function') {
+                    e.preventDefault();
+                    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+                }
+                const current = this.getCount(act, char) || 0;
+                const delta = e && e.deltaY < 0 ? 1 : -1;
+                let next = current + delta;
+                if (next < 0) next = 0;
+                this.onCountChange(act, char, next);
             },
             isChecked(act, char) {
                 const k = this.keyFor(act, char);
@@ -414,10 +515,13 @@
                 if (dn !== this.dayNumber || wn !== this.weekNumber) {
                     // Keys changed; reload view from storage under new suffixes
                     this.doneMap = {};
+                    this.countMap = {};
                     this.dayNumber = dn;
                     this.weekNumber = wn;
                     this.day = getDayOfWeek();
-                    this.$nextTick(() => this.loadFromStorage());
+                    this.$nextTick(() => {
+                        this.loadFromStorage();
+                    });
                 }
             }, 60 * 1000);
         },
