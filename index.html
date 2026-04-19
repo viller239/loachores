@@ -312,6 +312,7 @@
         { name: 'Crucible', reset: R_WEEKLY },
         { name: 'Hell', reset: R_WEEKLY },
         { name: 'Crucible Check', reset: R_WEEKLY },
+        { name: 'Hourglass', reset: R_WEEKLY },
         { spacer: true },
         { name: 'event vendor', reset: R_WEEKLY, roster: true },
         { name: 'mokoko vendor', reset: R_WEEKLY, roster: true },
@@ -356,7 +357,7 @@
 
     function getDayOfWeek() {
         const now = new Date();
-        return now.getUTCHours() >= DAILY_RESET_HOUR_UTC ? now.getUTCDay() : now.getUTCDay() - 1;
+        return ((now.getUTCHours() >= DAILY_RESET_HOUR_UTC ? now.getUTCDay() : now.getUTCDay() - 1) + 7) % 7;
     }
 
     const app = Vue.createApp({
