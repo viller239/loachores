@@ -155,6 +155,10 @@
             gap: 8px;
         }
 
+        .activity-name.is-counter {
+            padding-left: 22px;
+        }
+
         input[type="checkbox"] {
             appearance: none;
             width: 18px;
@@ -268,6 +272,16 @@
         .count-input.is-zero:not(:hover,:focus) {
             opacity: 0;
         }
+
+        .raid-summary {
+            margin-top: 20px;
+            margin-left: 22px;
+            line-height: 1.65;
+        }
+
+        .raid-summary-total {
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -290,7 +304,7 @@
                 <template v-if="!act.shouldRender || act.shouldRender(day)">
                     <div v-if="act.spacer" class="spacer-row"></div>
                     <div v-else class="cell">
-                        <span class="activity-name">
+                        <span class="activity-name" :class="{ 'is-counter': act.counter }">
                             <span v-if="act.reset" class="dot" :class="act.reset"></span>
                             <span>{{ act.name }}</span>
                         </span>
@@ -335,6 +349,15 @@
                 </template>
             </div>
         </template>
+        </div>
+    </div>
+    <div class="raid-summary">
+        <div v-for="difficulty in raidSummary.difficulties" :key="'summary-' + difficulty.name">
+            {{ difficulty.name }}: {{ difficulty.done }} / {{ difficulty.total }}
+        </div>
+        <div class="raid-summary-total">
+            <div>gold: {{ formatGold(raidSummary.gold[0]) }} / {{ formatGold(raidSummary.totalGold[0]) }}</div>
+            <div>bound gold: {{ formatGold(raidSummary.gold[1]) }} / {{ formatGold(raidSummary.totalGold[1]) }}</div>
         </div>
     </div>
 </div>
@@ -412,6 +435,7 @@
 
     const R_WEEKLY = 'weekly';
     const R_DAILY = 'daily';
+    const DIFFICULTIES = ['solo', 'normal', 'hard', 'nightmare'];
 
     const ACTIVITIES = [
         {
@@ -517,7 +541,38 @@
                 day: getDayOfWeek(),
             };
         },
+        computed: {
+            raidSummary() {
+                const difficulties = DIFFICULTIES.map((name) => ({ name, done: 0, total: 0 }));
+                const gold = [0, 0];
+                const totalGold = [0, 0];
+                this.activities.filter((act) => act.gold).forEach((act) => {
+                    this.rosters.forEach((roster) => {
+                        roster.characters.forEach((char) => {
+                            if (this.isHidden(act, char)) return;
+                            const name = this.getDifficulty(act, char);
+                            const reward = act.gold[name];
+                            if (!reward) return;
+                            const stats = difficulties.find((difficulty) => difficulty.name === name);
+                            stats.total++;
+                            totalGold[0] += reward[0];
+                            totalGold[1] += reward[1];
+                            if (!this.isChecked(act, char)) return;
+                            stats.done++;
+                            gold[0] += reward[0];
+                            gold[1] += reward[1];
+                        });
+                    });
+                });
+                return { difficulties, gold, totalGold };
+            },
+        },
         methods: {
+            formatGold(value) {
+                if (value >= 1000000) return `${Number((value / 1000000).toPrecision(3))}mil`;
+                if (value >= 1000) return `${Number((value / 1000).toPrecision(3))}k`;
+                return value;
+            },
             keyFor(act, char) {
                 let key = `done_${act.name}_${char.name}`;
                 if (act.reset === R_DAILY) {
