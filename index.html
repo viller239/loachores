@@ -156,11 +156,63 @@
         }
 
         input[type="checkbox"] {
+            appearance: none;
             width: 18px;
             height: 18px;
-            accent-color: var(--accent);
+            border: 0;
+            border-radius: 2px;
+            background: #fff;
+            position: relative;
             cursor: pointer;
             margin: 0;
+        }
+
+        input[type="checkbox"]:checked {
+            background: #3b82f6;
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 6px;
+            width: 4px;
+            height: 9px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        input[type="checkbox"].difficulty-solo {
+            box-shadow: inset 0 0 0 2px #87909f, 0 0 0 1px #87909f;
+        }
+
+        input[type="checkbox"].difficulty-normal {
+            box-shadow: inset 0 0 0 2px #3b82f6, 0 0 0 1px #3b82f6;
+        }
+
+        input[type="checkbox"].difficulty-hard {
+            box-shadow: inset 0 0 0 2px #f59e0b, 0 0 0 1px #f59e0b;
+        }
+
+        input[type="checkbox"].difficulty-nightmare {
+            box-shadow: inset 0 0 0 2px #7667e8, 0 0 0 1px #7667e8;
+        }
+
+        input[type="checkbox"].difficulty-solo:checked {
+            background: #87909f;
+        }
+
+        input[type="checkbox"].difficulty-normal:checked {
+            background: #3b82f6;
+        }
+
+        input[type="checkbox"].difficulty-hard:checked {
+            background: #f59e0b;
+        }
+
+        input[type="checkbox"].difficulty-nightmare:checked {
+            background: #7667e8;
         }
 
         .dot {
@@ -179,12 +231,34 @@
             background: #6366f1;
         }
 
+        .dot.solo {
+            background: #87909f;
+        }
+
+        .dot.normal {
+            background: #3b82f6;
+        }
+
+        .dot.hard {
+            background: #f59e0b;
+        }
+
+        .dot.nightmare {
+            background: #7667e8;
+        }
+
         .legend {
             display: flex;
+            align-items: center;
             gap: 16px;
             font-size: 14px;
             margin-bottom: 16px;
-            /* todo padding left */
+        }
+
+        .legend-difficulties {
+            display: flex;
+            gap: 16px;
+            margin-left: 20px;
         }
 
         .count-input {
@@ -217,6 +291,12 @@
     <div class="legend">
         <div><span class="dot weekly"></span>Weekly</div>
         <div><span class="dot daily"></span>Daily</div>
+        <div class="legend-difficulties">
+            <div><span class="dot solo"></span>Solo</div>
+            <div><span class="dot normal"></span>Normal</div>
+            <div><span class="dot hard"></span>Hard</div>
+            <div><span class="dot nightmare"></span>Nightmare</div>
+        </div>
     </div>
     <div class="grid-scroll">
         <div class="grid">
@@ -256,9 +336,10 @@
                                                 />
                                             </template>
                                             <template v-else>
-                                                <input type="checkbox"
+                                                <input type="checkbox" :class="difficultyClass(act, ch)"
                                                        :checked="isChecked(act, ch)"
                                                        @change="onToggle(act, ch, $event.target.checked)"
+                                                       @mousedown.middle.prevent.stop="onCycleDifficulty(act, ch)"
                                                 />
                                             </template>
                                         </label>
@@ -446,6 +527,7 @@
                 storageOk: true,
                 doneMap: {},
                 hiddenMap: {},
+                difficultyMap: {},
                 countMap: {},
                 dayNumber: getDayNumber(),
                 weekNumber: getWeekNumber(),
@@ -586,10 +668,58 @@
                     });
                 });
             },
+            difficultyKey(act, char) {
+                return `difficulty_${act.name}_${char.name}`;
+            },
+            difficultyOptions(act) {
+                return act.gold ? Object.keys(act.gold) : [];
+            },
+            getDifficulty(act, char) {
+                const options = this.difficultyOptions(act);
+                if (options.length === 0) return null;
+                const selected = this.difficultyMap[this.difficultyKey(act, char)];
+                return options.includes(selected) ? selected : options[0];
+            },
+            difficultyClass(act, char) {
+                const difficulty = this.getDifficulty(act, char);
+                return difficulty ? `difficulty-${difficulty}` : null;
+            },
+            onCycleDifficulty(act, char) {
+                const options = this.difficultyOptions(act);
+                if (options.length === 0) return;
+                const k = this.difficultyKey(act, char);
+                const currentIndex = options.indexOf(this.getDifficulty(act, char));
+                const next = options[(currentIndex + 1) % options.length];
+                this.difficultyMap[k] = next;
+                try {
+                    localStorage.setItem(k, next);
+                } catch (e) {
+                    this.storageOk = false;
+                }
+            },
+            loadDifficultyFromStorage() {
+                this.activities.forEach((act) => {
+                    const options = this.difficultyOptions(act);
+                    if (options.length === 0) return;
+                    this.rosters.forEach((roster) => {
+                        roster.characters.forEach((char) => {
+                            const k = this.difficultyKey(act, char);
+                            let selected = null;
+                            try {
+                                selected = localStorage.getItem(k);
+                            } catch (e) {
+                                this.storageOk = false;
+                            }
+                            this.difficultyMap[k] = options.includes(selected) ? selected : options[0];
+                        });
+                    });
+                });
+            },
         },
         mounted() {
             this.loadFromStorage();
             this.loadHiddenFromStorage();
+            this.loadDifficultyFromStorage();
             // Optional: refresh keys on day/week boundary change (every minute)
             this._timer = setInterval(() => {
                 const dn = getDayNumber();
