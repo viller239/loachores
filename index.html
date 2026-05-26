@@ -39,12 +39,21 @@
             max-width: max-content;
         }
 
+        .grid-scroll {
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
         .grid {
             display: flex;
             flex-direction: row;
             gap: 16px;
             background: transparent;
-            overflow: auto;
+            overflow: clip;
+            position: relative;
+            isolation: isolate;
+            width: max-content;
         }
 
         .col {
@@ -62,6 +71,44 @@
             justify-content: center;
             height: 34px;
             box-sizing: border-box;
+        }
+
+        .check-cell {
+            position: relative;
+        }
+
+        .check-cell:hover {
+            z-index: 1;
+        }
+
+        .check-cell::before,
+        .check-cell::after {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            pointer-events: none;
+            background: rgba(255, 255, 255, .16);
+            opacity: 0;
+            transition: opacity 100ms ease-out;
+        }
+
+        .check-cell::before {
+            top: 0;
+            bottom: 0;
+            left: -100vmax;
+            right: -100vmax;
+        }
+
+        .check-cell::after {
+            top: -100vmax;
+            bottom: -100vmax;
+            left: 0;
+            right: 0;
+        }
+
+        .check-cell:hover::before,
+        .check-cell:hover::after {
+            opacity: 1;
         }
 
         .cell-name {
@@ -171,7 +218,8 @@
         <div><span class="dot weekly"></span>Weekly</div>
         <div><span class="dot daily"></span>Daily</div>
     </div>
-    <div class="grid">
+    <div class="grid-scroll">
+        <div class="grid">
         <div class="col activity-col">
             <div class="cell"></div>
             <template v-for="(act, i) in activities" :key="'an-' + i">
@@ -222,6 +270,7 @@
                 </template>
             </div>
         </template>
+        </div>
     </div>
 </div>
 
@@ -315,7 +364,12 @@
         { name: 'Hourglass', reset: R_WEEKLY },
         { spacer: true },
         { name: 'event vendor', reset: R_WEEKLY, roster: true },
-        { name: 'mokoko vendor', reset: R_WEEKLY, roster: true },
+        { name: 'frog', reset: R_WEEKLY, roster: true },
+        { spacer: true },
+        { name: 'argussy 1', reset: R_WEEKLY, roster: true },
+        { name: 'argussy 2', reset: R_WEEKLY, roster: true },
+        { name: 'argussy 3', reset: R_WEEKLY, roster: true },
+        { spacer: true },
         {
             name: 'boss',
             reset: R_DAILY,
