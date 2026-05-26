@@ -183,36 +183,36 @@
             transform: rotate(45deg);
         }
 
-        input[type="checkbox"].difficulty-solo {
-            box-shadow: inset 0 0 0 2px #87909f, 0 0 0 1px #87909f;
+        input[type="checkbox"].difficulty-solo,
+        .dot.solo {
+            --difficulty-color: #87909f;
         }
 
-        input[type="checkbox"].difficulty-normal {
-            box-shadow: inset 0 0 0 2px #3b82f6, 0 0 0 1px #3b82f6;
+        input[type="checkbox"].difficulty-normal,
+        .dot.normal {
+            --difficulty-color: #3b82f6;
         }
 
-        input[type="checkbox"].difficulty-hard {
-            box-shadow: inset 0 0 0 2px #f59e0b, 0 0 0 1px #f59e0b;
+        input[type="checkbox"].difficulty-hard,
+        .dot.hard {
+            --difficulty-color: #f59e0b;
         }
 
-        input[type="checkbox"].difficulty-nightmare {
-            box-shadow: inset 0 0 0 2px #7667e8, 0 0 0 1px #7667e8;
+        input[type="checkbox"].difficulty-nightmare,
+        .dot.nightmare {
+            --difficulty-color: #7667e8;
         }
 
-        input[type="checkbox"].difficulty-solo:checked {
-            background: #87909f;
+        input[type="checkbox"][class*="difficulty-"] {
+            box-shadow: inset 0 0 0 2px var(--difficulty-color), 0 0 0 1px var(--difficulty-color);
         }
 
-        input[type="checkbox"].difficulty-normal:checked {
-            background: #3b82f6;
-        }
-
-        input[type="checkbox"].difficulty-hard:checked {
-            background: #f59e0b;
-        }
-
-        input[type="checkbox"].difficulty-nightmare:checked {
-            background: #7667e8;
+        input[type="checkbox"][class*="difficulty-"]:checked,
+        .dot.solo,
+        .dot.normal,
+        .dot.hard,
+        .dot.nightmare {
+            background: var(--difficulty-color);
         }
 
         .dot {
@@ -229,22 +229,6 @@
 
         .dot.daily {
             background: #6366f1;
-        }
-
-        .dot.solo {
-            background: #87909f;
-        }
-
-        .dot.normal {
-            background: #3b82f6;
-        }
-
-        .dot.hard {
-            background: #f59e0b;
-        }
-
-        .dot.nightmare {
-            background: #7667e8;
         }
 
         .legend {
@@ -524,7 +508,6 @@
             return {
                 rosters: ROSTERS,
                 activities: ACTIVITIES,
-                storageOk: true,
                 doneMap: {},
                 hiddenMap: {},
                 difficultyMap: {},
@@ -558,16 +541,12 @@
                 const cached = this.countMap[k];
                 if (typeof cached === 'number') return cached;
                 let n = 0;
-                try {
-                    const raw = localStorage.getItem(k);
-                    if (raw != null) {
-                        const parsed = parseInt(raw, 10);
-                        if (!isNaN(parsed) && parsed >= 0) {
-                            n = parsed;
-                        }
+                const raw = localStorage.getItem(k);
+                if (raw != null) {
+                    const parsed = parseInt(raw, 10);
+                    if (!isNaN(parsed) && parsed >= 0) {
+                        n = parsed;
                     }
-                } catch (e) {
-                    this.storageOk = false;
                 }
                 this.countMap[k] = n;
                 return n;
@@ -577,14 +556,10 @@
                 let n = parseInt(value, 10);
                 if (isNaN(n) || n < 0) n = 0;
                 this.countMap[k] = n;
-                try {
-                    if (n === 0) {
-                        localStorage.removeItem(k);
-                    } else {
-                        localStorage.setItem(k, String(n));
-                    }
-                } catch (e) {
-                    this.storageOk = false;
+                if (n === 0) {
+                    localStorage.removeItem(k);
+                } else {
+                    localStorage.setItem(k, String(n));
                 }
             },
             onCountWheel(act, char, e) {
@@ -607,14 +582,10 @@
             onToggle(act, char, checked) {
                 const k = this.keyFor(act, char);
                 this.doneMap[k] = checked;
-                try {
-                    if (checked) {
-                        localStorage.setItem(k, '1');
-                    } else {
-                        localStorage.removeItem(k);
-                    }
-                } catch (e) {
-                    this.storageOk = false;
+                if (checked) {
+                    localStorage.setItem(k, '1');
+                } else {
+                    localStorage.removeItem(k);
                 }
             },
             loadFromStorage() {
@@ -643,14 +614,10 @@
                 const k = this.hideKey(act, char);
                 const newVal = !this.hiddenMap[k];
                 this.hiddenMap[k] = newVal;
-                try {
-                    if (newVal) {
-                        localStorage.setItem(k, '1');
-                    } else {
-                        localStorage.removeItem(k);
-                    }
-                } catch (e) {
-                    this.storageOk = false;
+                if (newVal) {
+                    localStorage.setItem(k, '1');
+                } else {
+                    localStorage.removeItem(k);
                 }
             },
             loadHiddenFromStorage() {
@@ -672,13 +639,12 @@
                 return `difficulty_${act.name}_${char.name}`;
             },
             difficultyOptions(act) {
-                return act.gold ? Object.keys(act.gold) : [];
+                return Object.keys(act.gold ?? {});
             },
             getDifficulty(act, char) {
                 const options = this.difficultyOptions(act);
-                if (options.length === 0) return null;
                 const selected = this.difficultyMap[this.difficultyKey(act, char)];
-                return options.includes(selected) ? selected : options[0];
+                return options.includes(selected) ? selected : options[0] ?? null;
             },
             difficultyClass(act, char) {
                 const difficulty = this.getDifficulty(act, char);
@@ -686,30 +652,21 @@
             },
             onCycleDifficulty(act, char) {
                 const options = this.difficultyOptions(act);
-                if (options.length === 0) return;
+                if (!options.length) return;
                 const k = this.difficultyKey(act, char);
                 const currentIndex = options.indexOf(this.getDifficulty(act, char));
                 const next = options[(currentIndex + 1) % options.length];
                 this.difficultyMap[k] = next;
-                try {
-                    localStorage.setItem(k, next);
-                } catch (e) {
-                    this.storageOk = false;
-                }
+                localStorage.setItem(k, next);
             },
             loadDifficultyFromStorage() {
                 this.activities.forEach((act) => {
                     const options = this.difficultyOptions(act);
-                    if (options.length === 0) return;
+                    if (!options.length) return;
                     this.rosters.forEach((roster) => {
                         roster.characters.forEach((char) => {
                             const k = this.difficultyKey(act, char);
-                            let selected = null;
-                            try {
-                                selected = localStorage.getItem(k);
-                            } catch (e) {
-                                this.storageOk = false;
-                            }
+                            const selected = localStorage.getItem(k);
                             this.difficultyMap[k] = options.includes(selected) ? selected : options[0];
                         });
                     });
