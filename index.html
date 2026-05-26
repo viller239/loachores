@@ -349,12 +349,36 @@
     const R_DAILY = 'daily';
 
     const ACTIVITIES = [
-        { name: 'aigir', reset: R_WEEKLY },
-        { name: 'brel', reset: R_WEEKLY },
-        { name: 'mordum', reset: R_WEEKLY },
-        { name: 'armoche', reset: R_WEEKLY },
-        { name: 'kaze', reset: R_WEEKLY },
-        { name: 'serca', reset: R_WEEKLY },
+        {
+            name: 'aigir',
+            reset: R_WEEKLY,
+            gold: { solo: [0, 16800] },
+        },
+        {
+            name: 'brel',
+            reset: R_WEEKLY,
+            gold: { solo: [0, 19250]},
+        },
+        {
+            name: 'mordum',
+            reset: R_WEEKLY,
+            gold: { solo: [28000, 0] },
+        },
+        {
+            name: 'armoche',
+            reset: R_WEEKLY,
+            gold: { normal: [33000, 0], hard: [42000, 0] },
+        },
+        {
+            name: 'kaze',
+            reset: R_WEEKLY,
+            gold: {normal: [40000, 0], hard: [52000, 0] },
+        },
+        {
+            name: 'serca',
+            reset: R_WEEKLY,
+            gold: { normal: [35000, 0], hard: [44000, 0], nightmare: [54000, 0] },
+        },
         { spacer: true },
         { name: 'guild vendor', reset: R_WEEKLY },
         { name: 'elysian', reset: R_WEEKLY },
