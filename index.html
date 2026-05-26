@@ -279,6 +279,10 @@
             line-height: 1.65;
         }
 
+        .raid-summary-value.is-complete {
+            color: #86d99a;
+        }
+
         .raid-summary-total {
             margin-top: 8px;
         }
@@ -352,12 +356,17 @@
         </div>
     </div>
     <div class="raid-summary">
-        <div v-for="difficulty in raidSummary.difficulties" :key="'summary-' + difficulty.name">
-            {{ difficulty.name }}: {{ difficulty.done }} / {{ difficulty.total }}
+        <div class="raid-summary-count"
+             v-for="difficulty in raidSummary.difficulties" :key="'summary-' + difficulty.name">
+            {{ difficulty.name }}:
+            <span class="raid-summary-value"
+                  :class="{ 'is-complete': difficulty.total > 0 && difficulty.done === difficulty.total }">
+                {{ difficulty.done }} / {{ difficulty.total }}
+            </span>
         </div>
         <div class="raid-summary-total">
-            <div>gold: {{ formatGold(raidSummary.gold[0]) }} / {{ formatGold(raidSummary.totalGold[0]) }}</div>
-            <div>bound gold: {{ formatGold(raidSummary.gold[1]) }} / {{ formatGold(raidSummary.totalGold[1]) }}</div>
+            <div>gold: {{ formatGold(raidSummary.gold[0]) }} / {{ formatGold(raidSummary.totalGold[0]) }} ({{ formatPercent(raidSummary.gold[0], raidSummary.totalGold[0]) }})</div>
+            <div>bound gold: {{ formatGold(raidSummary.gold[1]) }} / {{ formatGold(raidSummary.totalGold[1]) }} ({{ formatPercent(raidSummary.gold[1], raidSummary.totalGold[1]) }})</div>
         </div>
     </div>
 </div>
@@ -572,6 +581,10 @@
                 if (value >= 1000000) return `${Number((value / 1000000).toPrecision(3))}mil`;
                 if (value >= 1000) return `${Number((value / 1000).toPrecision(3))}k`;
                 return value;
+            },
+            formatPercent(value, total) {
+                if (total === 0) return '0%';
+                return `${Math.round((value / total) * 100)}%`;
             },
             keyFor(act, char) {
                 let key = `done_${act.name}_${char.name}`;
