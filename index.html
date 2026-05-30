@@ -340,7 +340,11 @@
                                             <template v-else>
                                                 <input type="checkbox" :class="difficultyClass(act, ch)"
                                                        :checked="isChecked(act, ch)"
-                                                       @change="onToggle(act, ch, $event.target.checked)"
+                                                       @change="onCheckboxChange(act, ch, $event)"
+                                                       @mousedown.left.prevent="onCheckboxMouseDown(act, ch, $event)"
+                                                       @click="onCheckboxClick($event)"
+                                                       @mouseenter="onCheckboxMouseHover(act, ch, $event)"
+                                                       @mousemove="onCheckboxMouseHover(act, ch, $event)"
                                                        @mousedown.middle.prevent.stop="onCycleDifficulty(act, ch)"
                                                 />
                                             </template>
@@ -545,6 +549,7 @@
                 hiddenMap: {},
                 difficultyMap: {},
                 countMap: {},
+                checkboxDragValue: null,
                 dayNumber: getDayNumber(),
                 weekNumber: getWeekNumber(),
                 day: getDayOfWeek(),
@@ -655,6 +660,29 @@
                 } else {
                     localStorage.removeItem(k);
                 }
+            },
+            onCheckboxChange(act, char, event) {
+                this.onToggle(act, char, event.target.checked);
+                this.checkboxDragValue = event.target.checked;
+            },
+            onCheckboxMouseDown(act, char, event) {
+                if (event.buttons !== 1) return;
+                const checked = !this.isChecked(act, char);
+                this.checkboxDragValue = checked;
+                this.onToggle(act, char, checked);
+            },
+            onCheckboxClick(event) {
+                if (event.detail > 0) {
+                    event.preventDefault();
+                }
+            },
+            onCheckboxMouseHover(act, char, event) {
+                if ((event.buttons & 1) !== 1) {
+                    this.checkboxDragValue = null;
+                    return;
+                }
+                if (this.checkboxDragValue === null) return;
+                this.onToggle(act, char, this.checkboxDragValue);
             },
             loadFromStorage() {
                 this.activities.forEach((act) => {
