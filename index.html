@@ -283,6 +283,10 @@
             color: #86d99a;
         }
 
+        .raid-summary-break {
+            height: 8px;
+        }
+
         .raid-summary-total {
             margin-top: 8px;
         }
@@ -360,14 +364,23 @@
         </div>
     </div>
     <div class="raid-summary">
-        <div class="raid-summary-count"
-             v-for="difficulty in raidSummary.difficulties" :key="'summary-' + difficulty.name">
-            {{ difficulty.name }}:
+        <div class="raid-summary-count">
+            pugs:
             <span class="raid-summary-value"
-                  :class="{ 'is-complete': difficulty.total > 0 && difficulty.done === difficulty.total }">
-                {{ difficulty.done }} / {{ difficulty.total }}
+                  :class="{ 'is-complete': raidSummary.pugs.total > 0 && raidSummary.pugs.done === raidSummary.pugs.total }">
+                {{ raidSummary.pugs.done }} / {{ raidSummary.pugs.total }}
             </span>
         </div>
+        <template v-for="difficulty in raidSummary.difficulties" :key="'summary-' + difficulty.name">
+            <div class="raid-summary-count">
+                {{ difficulty.name }}:
+                <span class="raid-summary-value"
+                      :class="{ 'is-complete': difficulty.total > 0 && difficulty.done === difficulty.total }">
+                    {{ difficulty.done }} / {{ difficulty.total }}
+                </span>
+            </div>
+            <div v-if="difficulty.name === 'solo'" class="raid-summary-break"></div>
+        </template>
         <div class="raid-summary-total">
             <div>gold: {{ formatGold(raidSummary.gold[0]) }} / {{ formatGold(raidSummary.totalGold[0]) }} ({{ formatPercent(raidSummary.gold[0], raidSummary.totalGold[0]) }})</div>
             <div>bound gold: {{ formatGold(raidSummary.gold[1]) }} / {{ formatGold(raidSummary.totalGold[1]) }} ({{ formatPercent(raidSummary.gold[1], raidSummary.totalGold[1]) }})</div>
@@ -558,6 +571,7 @@
         computed: {
             raidSummary() {
                 const difficulties = DIFFICULTIES.map((name) => ({ name, done: 0, total: 0 }));
+                const pugs = { done: 0, total: 0 };
                 const gold = [0, 0];
                 const totalGold = [0, 0];
                 this.activities.filter((act) => act.gold).forEach((act) => {
@@ -569,16 +583,18 @@
                             if (!reward) return;
                             const stats = difficulties.find((difficulty) => difficulty.name === name);
                             stats.total++;
+                            if (name !== 'solo') pugs.total++;
                             totalGold[0] += reward[0];
                             totalGold[1] += reward[1];
                             if (!this.isChecked(act, char)) return;
                             stats.done++;
+                            if (name !== 'solo') pugs.done++;
                             gold[0] += reward[0];
                             gold[1] += reward[1];
                         });
                     });
                 });
-                return { difficulties, gold, totalGold };
+                return { difficulties, pugs, gold, totalGold };
             },
         },
         methods: {
