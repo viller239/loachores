@@ -502,7 +502,7 @@
         {
             name: 'aigirEx',
             reset: R_WEEKLY,
-            gold: { hard: [0, 45000] },
+            gold: { hard: [45000, 0] },
             roster: true,
         },
         { spacer: true },
@@ -584,8 +584,9 @@
                 const totalGold = [0, 0];
                 this.activities.filter((act) => act.gold).forEach((act) => {
                     this.rosters.forEach((roster) => {
-                        roster.characters.forEach((char) => {
+                        roster.characters.forEach((char, i) => {
                             if (this.isHidden(act, char)) return;
+                            if (act.roster && (i !== 0)) return;
                             const name = this.getDifficulty(act, char);
                             const reward = act.gold[name];
                             if (!reward) return;
