@@ -395,27 +395,23 @@
         {
             characters: [
                 { name: 'GL' },
+                { name: 'S1' },
                 { name: 'Zerk' },
                 { name: 'Pala' },
                 { name: 'Arti' },
                 { name: 'SH' },
-                { name: 'Sorc' },
-                { name: 'Bard' },
-                { name: 'Artist' },
-                { name: 'Valk' },
-                { name: 'WS' },
-                { name: 'Aero' },
-            ],
-        },
-        {
-            characters: [
-                { name: 'S1' },
                 { name: 'S2' },
                 { name: 'S3' },
                 { name: 'S4' },
                 { name: 'S5' },
                 { name: 'S6' },
+                { name: 'Sorc' },
+                { name: 'Bard' },
+                { name: 'Artist' },
                 { name: 'SE' },
+                { name: 'Valk' },
+                { name: 'Aero' },
+                { name: 'WS' },
                 { name: 'Brk' },
             ],
         },
@@ -465,42 +461,27 @@
 
     const ACTIVITIES = [
         {
-            name: 'aigir',
-            reset: R_WEEKLY,
-            gold: { solo: [5750, 5750] },
-        },
-        {
-            name: 'brel',
-            reset: R_WEEKLY,
-            gold: { solo: [8250, 8250]},
-        },
-        {
-            name: 'mordum',
-            reset: R_WEEKLY,
-            gold: { solo: [10500, 10500] },
-        },
-        {
             name: 'armoche',
             reset: R_WEEKLY,
-            gold: { solo: [16500, 16500], normal: [16500, 16500], hard: [42000, 0] },
+            gold: { solo: [16500, 16500], hard: [42000, 0] },
         },
         {
             name: 'kaze',
             reset: R_WEEKLY,
-            gold: { solo: [20000, 20000], normal: [20000, 20000], hard: [52000, 0] },
+            gold: { solo: [20000, 20000], hard: [52000, 0] },
         },
         {
             name: 'serca',
             reset: R_WEEKLY,
-            gold: { solo: [17500, 17500], normal: [17500, 17500], hard: [44000, 0], nightmare: [54000, 0] },
+            gold: { solo: [17500, 17500], nightmare: [54000, 0] },
         },
         {
             name: 'cathedral',
             reset: R_WEEKLY,
-            gold: { normal: [0, 30000], hard: [0, 40000], nightmare: [0, 50000] },
+            gold: { nightmare: [0, 50000] },
         },
         {
-            name: 'aigirEx',
+            name: 'brelEx',
             reset: R_WEEKLY,
             gold: { hard: [45000, 0] },
             roster: true,
@@ -515,7 +496,7 @@
         { spacer: true },
         { name: 'event vendor', reset: R_WEEKLY, roster: true },
         { name: 'mokoko vendor', reset: R_WEEKLY, roster: true },
-        { name: 'aigir vendor', reset: R_WEEKLY, roster: true },
+        { name: 'ex vendor', reset: R_WEEKLY, roster: true },
         { spacer: true },
         {
             name: 'boss',
